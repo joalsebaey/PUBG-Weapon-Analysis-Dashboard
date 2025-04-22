@@ -1,0 +1,361 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import io
+from typing import List
+
+# Create a list to store image titles
+_mfajlsdf98q21_image_title_list = []
+
+# Read the CSV data
+csv_data = """Weapon Name,Weapon Type,Bullet Type,Damage,Magazine Capacity,Range,Bullet Speed,Rate of Fire,Shots to Kill (Chest),Shots to Kill (Head),Damage Per Second,Fire Mode,BDMG_0,BDMG_1,BDMG_2,BDMG_3,HDMG_0,HDMG_1,HDMG_2,HDMG_3
+Groza,Assault Rifle,7.62,49,30,400,715,0.08,4,2,612,"Single, Automatic, Burst",47,34.3,29.4,22,115.1,80.6,69,51.8
+AKM,Assault Rifle,7.62,49,30,400,710,0.01,4,2,490,"Single, Automatic",47,34.3,29.4,22,115.1,80.6,69,51.8
+M762,Assault Rifle,7.62,47,30,400,715,0.086,4,2,547,"Single, Automatic, Burst",46,32.9,28.2,21.1,110.4,77.3,66.2,49.7
+MK47 Mutant,Assault Rifle,7.62,49,30,500,715,0.01,4,2,490,"Single, Burst",49,34.3,29.4,22,115.1,80.6,69,51.8
+AUG A3,Assault Rifle,5.56,43,30,600,880,0.086,4,2,502,"Single, Automatic",41,30.1,25.8,19.3,101,70.7,60.6,45.4
+SCAR-L,Assault Rifle,5.56,43,30,600,880,0.096,4,2,448,"Single, Automatic",41,30.1,25.8,19.3,101,70.7,60.6,45.4
+M416,Assault Rifle,5.56,43,30,600,890,0.086,4,2,502,"Single, Automatic",41,30.1,25.8,19.3,101,70.7,60.6,45.4
+M16A4,Assault Rifle,5.56,43,30,600,900,0.01,4,2,430,"Single, Burst",43,30.1,25.8,19.3,101,70.7,60.6,45.4
+G36C,Assault Rifle,5.56,43,30,600,880,0.086,4,2,502,"Single, Automatic",41,30.1,25.8,19.3,101,70.7,60.6,45.4
+OBZ,Assault Rifle,5.56,43,30,600,880,0.096,4,2,466,"Single, Automatic",41,30.1,25.8,19.3,101,70.7,60.6,45.4
+M249,Light Machine Gun,5.56,45,100,400,915,0.075,4,2,600,Automatic,45,31.4,27,20.2,103.4,72.4,62,46.5
+DP-28,Light Machine Gun,7.62,51,47,600,715,0.109,4,2,468,Automatic,51,35.6,30.6,22.9,117.3,82.1,70.3,52.7
+Vector,Submachine Gun,9,31,19,50,300,0.055,5,3,569,"Single, Automatic, Burst",31,21.7,18.5,13.9,55.8,39,33.4,25.1
+Uzi,Submachine Gun,9,26,25,200,350,0.048,7,4,542,"Single, Automatic",26,18.2,15.6,11.7,46.8,32.7,28,21
+PP-Bizon,Submachine Gun,9,35,53,300,300,0.076,5,3,408,"Single, Automatic",35,24.5,21,15.7,63,44,37.8,28.3
+MP5K,Submachine Gun,9,33,30,200,330,0.0645,5,3,495,"Single, Automatic, Burst",33,23,19.8,14.8,59.4,41.5,35.6,26.7
+Thompson,Submachine Gun,0.45,40,30,200,280,0.086,5,3,467,"Single, Automatic",40,28,24,18,72,50.4,43.1,32.4
+UMP45,Submachine Gun,0.45,39,25,300,250,0.092,5,3,423,"Single, Automatic, Burst",39,27.3,23.4,17.5,70.2,49.1,42.1,31.5
+S686,Shotgun,12,216,2,25,370,0.2,1,1,1080,Automatic,207.9,145.8,124.2,93.6,312.3,218.7,187.2,140.4
+S1897,Shotgun,12,216,5,25,360,0.7,1,1,288,Automatic,204.3,143.1,122.4,91.8,306.9,215.1,184.5,137.7
+S12K,Shotgun,12,198,5,25,350,0.25,1,1,792,Automatic,282.6,198,169.2,126.9,188.1,131.4,112.5,84.6
+MK14,Designed Marksman Rifle,7.62,61,10,800,853,0.09,3,2,678,"Single, Automatic",64,44.8,38.4,28.8,143.3,100.3,86,64.5
+SLR,Designed Marksman Rifle,7.62,56,10,800,835,0.01,3,2,580,Automatic,60.9,42.6,36.5,27.4,136.3,95.4,81.7,61.3
+SKS,Designed Marksman Rifle,7.62,53,10,800,800,0.01,3,2,530,Automatic,55.6,38.9,33.3,25,124.5,87.1,74.7,56
+QBU,Designed Marksman Rifle,5.56,48,10,800,800,0.01,3,2,480,Automatic,50.4,35.2,30.2,22.6,112.8,78.9,67.6,50.7
+Mini14,Designed Marksman Rifle,5.56,46,20,700,990,0.01,3,2,460,Automatic,48.3,33.8,28.9,21.7,108.1,75.6,64.8,48.6
+VSS,Designed Marksman Rifle,9,41,10,500,300,0.01,3,2,479,Automatic,43,30.1,25.8,19.3,96.3,67.4,57.8,43.3
+AWM,Sniper Rifle,0.3,105,5,900,910,1.85,2,1,65,Single,136.5,95.5,81.8,61.4,262.5,183.7,157.5,118.1
+M24,Sniper Rifle,7.62,79,5,800,790,1.8,2,1,44,Single,86.9,60.8,52,39.1,197,138,118,89
+Kar98,Sniper Rifle,7.62,75,5,800,760,1.9,2,1,39,Single,102.7,71.8,61.6,46.2,197.5,138.2,118.5,88.8
+Win94,Sniper Rifle,0.45,66,5,600,710,0.6,2,2,110,Single,72.6,50.8,43.5,32.6,165,115.4,99,74.2
+Sawed-Off,Pistol,12,160,2,25,,0.25,2,1,640,Automatic,159.2,111.2,95.2,71.2,238.4,167.2,143.2,107.2
+R1895,Pistol,7.62,55,7,25,330,0.4,4,2,137.51,Automatic,54.8,38.3,32.8,24.6,109.6,76.7,65.7,49.3
+R45,Pistol,0.45,55,6,25,,0.25,4,2,220,Automatic,54.8,38.3,32.8,24.6,109.6,76.7,65.7,49.3
+P1911,Pistol,0.45,41,15,25,250,0.11,5,3,373,Automatic,40.6,28.4,24.3,18.2,81.2,56.8,48.7,36.5
+P92,Pistol,9,35,7,25,380,0.14,5,3,259,Automatic,34.5,24.2,20.7,15.5,69.1,48.4,41.4,31.1
+P18C,Pistol,9,23,17,25,375,0.06,8,4,383,Automatic,22.4,15.7,13.4,10.1,44.9,31.4,26.9,20.2
+Skorpion,Pistol,9,22,20,60,400,0.07,8,4,312,Automatic,,,,,,,, 
+Crossbow,Other,,106,1,,,3.8,2,1,28,Single,,,,,,,, 
+Pan,Melee,,80,1,,,0.75,3,1,107,Single,,,,,,,, 
+Crowbar,Melee,,60,1,,,0.75,3,2,80,Single,,,,,,,, 
+Sickle,Melee,,60,1,,,0.75,3,2,80,Single,,,,,,,, 
+Machete,Melee,,60,1,,,0.75,3,2,80,Single,,,,,,,, 
+Punch,Melee,,18,1,,,0.33,10,4,55,Single,,,,,,,,"""
+
+df = pd.read_csv(io.StringIO(csv_data))
+
+# Clean up data - handle missing values
+df = df.replace('', np.nan)
+
+# Convert columns to numeric where appropriate
+numeric_cols = ['Damage', 'Magazine Capacity', 'Range', 'Bullet Speed', 
+                'Rate of Fire', 'Shots to Kill (Chest)', 'Shots to Kill (Head)', 
+                'Damage Per Second']
+for col in numeric_cols:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+
+# 1. Count of weapons by weapon type
+plt.figure(figsize=(12, 6))
+weapon_counts = df['Weapon Type'].value_counts().sort_values(ascending=False)
+bars = plt.bar(weapon_counts.index, weapon_counts.values, color='skyblue')
+plt.xlabel('Weapon Type')
+plt.ylabel('Count')
+plt.title('Number of Weapons by Type')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+
+# Add count labels on top of bars
+for bar in bars:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+             f'{height:.0f}', ha='center', va='bottom')
+
+_mfajlsdf98q21_image_title_list.append('Number of Weapons by Type')
+plt.show()
+
+# 2. Count of weapons by bullet type
+plt.figure(figsize=(12, 6))
+bullet_counts = df['Bullet Type'].value_counts().sort_values(ascending=False)
+bars = plt.bar(bullet_counts.index, bullet_counts.values, color='lightgreen')
+plt.xlabel('Bullet Type')
+plt.ylabel('Count')
+plt.title('Number of Weapons by Bullet Type')
+plt.xticks(rotation=0)
+plt.tight_layout()
+
+# Add count labels on top of bars
+for bar in bars:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+             f'{height:.0f}', ha='center', va='bottom')
+
+_mfajlsdf98q21_image_title_list.append('Number of Weapons by Bullet Type')
+plt.show()
+
+# 3. Relationship between weapon type and bullet type
+plt.figure(figsize=(14, 8))
+weapon_bullet_counts = df.groupby(['Weapon Type', 'Bullet Type']).size().unstack().fillna(0)
+weapon_bullet_counts.plot(kind='bar', stacked=True, colormap='viridis')
+plt.xlabel('Weapon Type')
+plt.ylabel('Count')
+plt.title('Bullet Types Used by Different Weapon Categories')
+plt.xticks(rotation=45, ha='right')
+plt.legend(title='Bullet Type', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
+_mfajlsdf98q21_image_title_list.append('Bullet Types Used by Different Weapon Categories')
+plt.show()
+
+# 4. Average damage by weapon type
+plt.figure(figsize=(12, 6))
+avg_damage = df.groupby('Weapon Type')['Damage'].mean().sort_values(ascending=False)
+bars = plt.bar(avg_damage.index, avg_damage.values, color='salmon')
+plt.xlabel('Weapon Type')
+plt.ylabel('Average Damage')
+plt.title('Average Damage by Weapon Type')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+
+# Add value labels on top of bars
+for bar in bars:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height + 1,
+             f'{height:.1f}', ha='center', va='bottom')
+
+_mfajlsdf98q21_image_title_list.append('Average Damage by Weapon Type')
+plt.show()
+
+# 5. Average damage by bullet type
+plt.figure(figsize=(12, 6))
+avg_damage_bullet = df.groupby('Bullet Type')['Damage'].mean().sort_values(ascending=False)
+# Filter out NaN values
+avg_damage_bullet = avg_damage_bullet.dropna()
+bars = plt.bar(avg_damage_bullet.index, avg_damage_bullet.values, color='lightcoral')
+plt.xlabel('Bullet Type')
+plt.ylabel('Average Damage')
+plt.title('Average Damage by Bullet Type')
+plt.xticks(rotation=0)
+plt.tight_layout()
+
+# Add value labels on top of bars
+for bar in bars:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height + 1,
+             f'{height:.1f}', ha='center', va='bottom')
+
+_mfajlsdf98q21_image_title_list.append('Average Damage by Bullet Type')
+plt.show()
+
+# 6. Scatter plot: Damage vs. Fire Rate colored by bullet type
+plt.figure(figsize=(12, 8))
+bullet_types = df['Bullet Type'].dropna().unique()
+colors = plt.cm.tab10(np.linspace(0, 1, len(bullet_types)))
+color_map = dict(zip(bullet_types, colors))
+
+for bullet_type in bullet_types:
+    subset = df[df['Bullet Type'] == bullet_type]
+    plt.scatter(subset['Rate of Fire'], subset['Damage'], 
+                label=bullet_type, 
+                color=color_map[bullet_type],
+                alpha=0.7,
+                s=80)
+
+plt.xlabel('Rate of Fire (seconds between shots)')
+plt.ylabel('Damage')
+plt.title('Damage vs. Rate of Fire by Bullet Type')
+plt.legend(title='Bullet Type', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
+_mfajlsdf98q21_image_title_list.append('Damage vs. Rate of Fire by Bullet Type')
+plt.show()
+
+# 7. Box plot: Damage per second by weapon type
+plt.figure(figsize=(14, 8))
+df.boxplot(column='Damage Per Second', by='Weapon Type', grid=False, color='blue')
+plt.title('Damage Per Second by Weapon Type')
+plt.suptitle('')  # Remove the automatic title
+plt.xlabel('Weapon Type')
+plt.ylabel('Damage Per Second')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+_mfajlsdf98q21_image_title_list.append('Damage Per Second by Weapon Type')
+plt.show()
+
+# 8. Box plot: Damage per second by bullet type
+plt.figure(figsize=(12, 8))
+df.boxplot(column='Damage Per Second', by='Bullet Type', grid=False, color='green')
+plt.title('Damage Per Second by Bullet Type')
+plt.suptitle('')  # Remove the automatic title
+plt.xlabel('Bullet Type')
+plt.ylabel('Damage Per Second')
+plt.xticks(rotation=0)
+plt.tight_layout()
+_mfajlsdf98q21_image_title_list.append('Damage Per Second by Bullet Type')
+plt.show()
+
+# 9. Correlation heatmap of numeric features
+plt.figure(figsize=(12, 10))
+corr_cols = ['Damage', 'Magazine Capacity', 'Range', 'Bullet Speed', 
+             'Rate of Fire', 'Shots to Kill (Chest)', 'Shots to Kill (Head)', 
+             'Damage Per Second']
+corr_matrix = df[corr_cols].corr()
+im = plt.imshow(corr_matrix, cmap='coolwarm')
+plt.colorbar(im)
+plt.title('Correlation Matrix of Weapon Attributes')
+plt.xticks(np.arange(len(corr_cols)), corr_cols, rotation=45, ha='right')
+plt.yticks(np.arange(len(corr_cols)), corr_cols)
+
+# Add correlation values to cells
+for i in range(len(corr_cols)):
+    for j in range(len(corr_cols)):
+        text = plt.text(j, i, f'{corr_matrix.iloc[i, j]:.2f}',
+                       ha="center", va="center", color="black" if abs(corr_matrix.iloc[i, j]) < 0.7 else "white")
+
+plt.tight_layout()
+_mfajlsdf98q21_image_title_list.append('Correlation Matrix of Weapon Attributes')
+plt.show()
+
+# 10. Radar chart of top weapons by damage in each category
+plt.figure(figsize=(12, 10))
+
+# Get top weapon by damage for each type
+top_weapons = df.loc[df.groupby('Weapon Type')['Damage'].idxmax()]
+top_weapons = top_weapons.sort_values('Damage', ascending=False)
+
+# Select attributes for the radar chart
+attributes = ['Damage', 'Rate of Fire', 'Range', 'Bullet Speed', 'Magazine Capacity']
+
+
+# Number of attributes
+N = len(attributes)
+
+# Create angles for each attribute
+angles = [n / float(N) * 2 * np.pi for n in range(N)]
+angles += angles[:1]  # Close the loop
+
+# Create the plot
+ax = plt.subplot(111, polar=True)
+
+# Draw one axis per variable and add labels
+plt.xticks(angles[:-1], attributes, size=12)
+
+# Draw y-axis labels (values)
+ax.set_rlabel_position(0)
+plt.yticks([20, 40, 60, 80, 100], ["20", "40", "60", "80", "100"], color="grey", size=10)
+plt.ylim(0, 100)
+
+# Plot each weapon
+for i, weapon in enumerate(top_weapons.iloc[:5].iterrows()):
+    weapon_name = weapon[1]['Weapon Name']
+    weapon_type = weapon[1]['Weapon Type']
+    
+    # Normalize values for better visualization
+    values = [
+        min(100, weapon[1]['Damage']), 
+        min(100, 100 - (weapon[1]['Rate of Fire'] * 50)),  # Lower is better, so invert
+        min(100, weapon[1]['Range'] / 10),
+        min(100, weapon[1]['Bullet Speed'] / 10),
+        min(100, weapon[1]['Magazine Capacity'] * 2)
+    ]
+    values += values[:1]  # Close the loop
+    
+    # Plot values
+    ax.plot(angles, values, linewidth=2, linestyle='solid', label=f"{weapon_name} ({weapon_type})")
+    ax.fill(angles, values, alpha=0.1)
+
+# Add legend
+plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+plt.title('Top Weapons by Damage Across Different Attributes')
+_mfajlsdf98q21_image_title_list.append('Top Weapons by Damage Across Different Attributes')
+plt.show()
+
+# 11. Average shots to kill (Chest vs Head) by weapon type
+plt.figure(figsize=(14, 8))
+avg_shots = df.groupby('Weapon Type')[['Shots to Kill (Chest)', 'Shots to Kill (Head)']].mean()
+avg_shots = avg_shots.sort_values('Shots to Kill (Chest)', ascending=False)
+
+x = np.arange(len(avg_shots.index))
+width = 0.35
+
+fig, ax = plt.subplots(figsize=(14, 8))
+chest_bars = ax.bar(x - width/2, avg_shots['Shots to Kill (Chest)'], width, label='Chest Shots', color='blue')
+head_bars = ax.bar(x + width/2, avg_shots['Shots to Kill (Head)'], width, label='Head Shots', color='red')
+
+ax.set_ylabel('Average Shots to Kill')
+ax.set_xlabel('Weapon Type')
+ax.set_title('Average Shots to Kill (Chest vs Head) by Weapon Type')
+ax.set_xticks(x)
+ax.set_xticklabels(avg_shots.index, rotation=45, ha='right')
+ax.legend()
+
+# Add value labels
+def add_labels(bars):
+    for bar in bars:
+        height = bar.get_height()
+        ax.annotate(f'{height:.1f}',
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom')
+
+add_labels(chest_bars)
+add_labels(head_bars)
+
+fig.tight_layout()
+_mfajlsdf98q21_image_title_list.append('Average Shots to Kill (Chest vs Head) by Weapon Type')
+plt.show()
+
+# 12. Summary statistics table by bullet type
+plt.figure(figsize=(14, 8))
+bullet_stats = df.groupby('Bullet Type').agg({
+    'Damage': 'mean',
+    'Magazine Capacity': 'mean',
+    'Range': 'mean',
+    'Bullet Speed': 'mean',
+    'Rate of Fire': 'mean',
+    'Shots to Kill (Chest)': 'mean',
+    'Shots to Kill (Head)': 'mean',
+    'Damage Per Second': 'mean'
+}).round(2)
+
+# Reorder columns for better presentation
+bullet_stats = bullet_stats[[
+    'Damage', 'Damage Per Second', 'Shots to Kill (Chest)', 'Shots to Kill (Head)',
+    'Rate of Fire', 'Bullet Speed', 'Range', 'Magazine Capacity'
+]]
+
+# Remove NaN rows
+bullet_stats = bullet_stats.dropna(how='all')
+
+# Create a table plot
+ax = plt.subplot(111, frame_on=False)
+ax.xaxis.set_visible(False)
+ax.yaxis.set_visible(False)
+
+table = plt.table(
+    cellText=bullet_stats.values,
+    rowLabels=bullet_stats.index,
+    colLabels=bullet_stats.columns,
+    cellLoc='center',
+    loc='center',
+    colWidths=[0.12] * len(bullet_stats.columns)
+)
+
+table.auto_set_font_size(False)
+table.set_fontsize(10)
+table.scale(1.2, 1.5)
+
+plt.title('Summary Statistics by Bullet Type', y=0.92, fontsize=16)
+_mfajlsdf98q21_image_title_list.append('Summary Statistics by Bullet Type')
+plt.show()
